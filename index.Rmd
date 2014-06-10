@@ -1,0 +1,348 @@
+---
+title       : Movies Budget Explorer
+subtitle    : An Application to study the development of movie budgets between 1883 and 2005
+author      : Axel Schwanke, 2014
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+---
+
+## Overview
+
+The movies database (ggplot2 package) contains information and user ratings 
+of 58788 movies from the internet movie database (IMDB.com). It is one of 
+the biggest searchable movie database on the web and is run by amazon.
+
+This application illustrates the development of movie budget between the
+years 1900 and 2005 dependent on the movie creation year, the movie rating, 
+and the movie genre.
+
+It is shown that the increase in budget for action movies is twice as high
+as for other genre movies.
+
+It is shown the the budget is less and less independent of the movie rating.
+Nowadays low-rated movies require about the same budget as high-rated movies.
+
+--- 
+
+### Movie Budget of all movies between 1900 and 2005
+
+The following figure shows the increase of movie budget.
+<br>
+It illustrates the strong increase over the last 20 years.
+
+```{r, echo=FALSE, fig.width=13., fig.height=6.5}
+library(ggplot2)
+
+dataset1 <- na.omit(movies)
+  dataset2 <- subset(dataset1, 
+    dataset1$year >= 1900 & 
+    dataset1$year <= 2005 &  
+    dataset1$length >= 0 & 
+    dataset1$length <= 1000 &  
+    dataset1$rating >= 1. &  
+    dataset1$rating <= 10. &
+    (
+    dataset1$Action == 1 |
+    dataset1$Animation == 1 |
+    dataset1$Comedy == 1 |
+    dataset1$Drama == 1 |
+    dataset1$Documentary == 1 |
+    dataset1$Romance == 1 |
+    dataset1$Short == 1
+    )
+    )
+
+
+
+  xx=seq(1900,2005)
+  xx2 <- sort(unique(dataset2$year))
+  yy=rep(NA,length(xx))
+  # mean movie budget per year
+  for (i in 1:length(xx)) {
+    ss <- subset(dataset2,dataset2$year==xx[i])
+    yy[i] <- mean(ss$budget)
+  }
+
+  df <- data.frame(cbind(xx,yy))
+  names(df) <- c('year','budget')
+
+  budgetMax <- max(na.omit(df$budget),10)
+  
+    
+  
+  plot(budget ~ year, 
+    data=df, 
+    xlim=c(1900 ,2005 ),
+    ylim=c(0,budgetMax),
+    xlab="Year", ylab="Budget ($)", 
+    main="Mean Budget of all Movies")
+
+  if (length(xx2)>0) {
+    fit <- lm(budget~poly(year,3,raw=TRUE), data=df)
+    lines(xx2,fit$fitted, col='blue',lwd=1.5)
+  }
+
+```
+
+---
+
+### Budget of  Movies of different genres between 1900 and 2005
+
+- For all movie genres the budget increases significantly
+- The increase for action movies is about twice as high as for other genre movies
+
+```{r, echo=FALSE, fig.width=13., fig.height=6.}
+library(ggplot2)
+
+dataset1 <- na.omit(movies)
+budgetMax <- max(dataset1$budget)
+
+  dataset2 <- subset(dataset1, 
+    dataset1$year >= 1900 & 
+    dataset1$year <= 2005 &  
+    dataset1$length >= 0 & 
+    dataset1$length <= 1000 &  
+    dataset1$rating >= 1. &  
+    dataset1$rating <= 10. &
+    (
+    dataset1$Action      == 1 |
+    dataset1$Animation   == 99 |
+    dataset1$Comedy      == 99 |
+    dataset1$Drama       == 99 |
+    dataset1$Documentary == 99 |
+    dataset1$Romance     == 99 |
+    dataset1$Short       == 99
+    )
+    )
+
+  dataset3 <- subset(dataset1, 
+    dataset1$year >= 1900 & 
+    dataset1$year <= 2005 &  
+    dataset1$length >= 0 & 
+    dataset1$length <= 1000 &  
+    dataset1$rating >= 1. &  
+    dataset1$rating <= 10. &
+    (
+    dataset1$Action      == 99 |
+    dataset1$Animation   == 99 |
+    dataset1$Comedy      == 1 |
+    dataset1$Drama       == 99 |
+    dataset1$Documentary == 99 |
+    dataset1$Romance     == 99 |
+    dataset1$Short       == 99
+    )
+    )
+
+  dataset4 <- subset(dataset1, 
+    dataset1$year >= 1900 & 
+    dataset1$year <= 2005 &  
+    dataset1$length >= 0 & 
+    dataset1$length <= 1000 &  
+    dataset1$rating >= 1. &  
+    dataset1$rating <= 10. &
+    (
+    dataset1$Action      == 99 |
+    dataset1$Animation   == 99 |
+    dataset1$Comedy      == 99 |
+    dataset1$Drama       == 99 |
+    dataset1$Documentary == 99 |
+    dataset1$Romance     == 1 |
+    dataset1$Short       == 99
+    )
+    )
+
+
+  xx=seq(1900,2005)
+
+  xx2 <- sort(unique(dataset2$year))
+  yy=rep(NA,length(xx))
+  # mean movie budget per year
+  for (i in 1:length(xx)) {
+    ss <- subset(dataset2,dataset2$year==xx[i])
+    yy[i] <- mean(ss$budget)
+  }
+
+  df2 <- data.frame(cbind(xx,yy))
+  names(df2) <- c('year','budget')
+
+
+  xx3 <- sort(unique(dataset3$year))
+  yy=rep(NA,length(xx))
+  # mean movie budget per year
+  for (i in 1:length(xx)) {
+    ss <- subset(dataset3,dataset3$year==xx[i])
+    yy[i] <- mean(ss$budget)
+  }
+
+  df3 <- data.frame(cbind(xx,yy))
+  names(df3) <- c('year','budget')
+
+
+  xx4 <- sort(unique(dataset4$year))
+  yy=rep(NA,length(xx))
+  # mean movie budget per year
+  for (i in 1:length(xx)) {
+    ss <- subset(dataset4,dataset4$year==xx[i])
+    yy[i] <- mean(ss$budget)
+  }
+
+  df4 <- data.frame(cbind(xx,yy))
+  names(df4) <- c('year','budget')
+
+
+  budgetMax <- max(na.omit(df2$budget),na.omit(df3$budget),na.omit(df4$budget))
+  
+    
+  
+
+
+par(mfrow=c(1,3))
+  plot(budget ~ year, 
+    data=df2, 
+    xlim=c(1900 ,2005 ),
+    ylim=c(0,budgetMax),
+    xlab="Year", ylab="Budget ($)", 
+    main="Action Movies")
+
+  if (length(xx2)>0) {
+    fit <- lm(budget~poly(year,3,raw=TRUE), data=df2)
+    lines(xx2,fit$fitted, col='blue',lwd=1.5)
+  }
+
+  plot(budget ~ year, 
+    data=df3, 
+    xlim=c(1900 ,2005 ),
+    ylim=c(0,budgetMax),
+    xlab="Year", ylab="Budget ($)", 
+    main="Comedy Movies")
+
+  if (length(xx3)>0) {
+    fit <- lm(budget~poly(year,3,raw=TRUE), data=df3)
+    lines(xx3,fit$fitted, col='blue',lwd=1.5)
+  }
+
+  plot(budget ~ year, 
+    data=df4, 
+    xlim=c(1900 ,2005 ),
+    ylim=c(0,budgetMax),
+    xlab="Year", ylab="Budget ($)", 
+    main="Romantic Movies")
+
+  if (length(xx4)>0) {
+    fit <- lm(budget~poly(year,3,raw=TRUE), data=df4)
+    lines(xx4,fit$fitted, col='blue',lwd=1.5)
+  }
+```
+
+---
+
+### Budget of low- and high-rated Movies between 1950 and 2005
+
+Whereas the budget of low-rated movies was significantly lower in former years
+the figures illustrate that in the last two decades the budget of low-rated movies (rating: 0-5) 
+has increased significantly and nearly reached that of high-rated movies (rating: 5-10).
+
+
+```{r, echo=FALSE, fig.width=13., fig.height=6.}
+library(ggplot2)
+
+dataset1 <- na.omit(movies)
+budgetMax <- max(dataset1$budget)
+
+  dataset2 <- subset(dataset1, 
+    dataset1$year >= 1950 & 
+    dataset1$year <= 2000 &  
+    dataset1$length >= 0 & 
+    dataset1$length <= 1000 &  
+    dataset1$rating >= 1. &  
+    dataset1$rating <= 5. &
+    (
+    dataset1$Action      == 1 |
+    dataset1$Animation   == 1 |
+    dataset1$Comedy      == 1 |
+    dataset1$Drama       == 1 |
+    dataset1$Documentary == 1 |
+    dataset1$Romance     == 1 |
+    dataset1$Short       == 1
+    )
+    )
+
+  dataset3 <- subset(dataset1, 
+    dataset1$year >= 1950 & 
+    dataset1$year <= 2005 &  
+    dataset1$length >= 0 & 
+    dataset1$length <= 1000 &  
+    dataset1$rating >= 5.01 &  
+    dataset1$rating <= 10. &
+    (
+    dataset1$Action      == 1 |
+    dataset1$Animation   == 1 |
+    dataset1$Comedy      == 1 |
+    dataset1$Drama       == 1 |
+    dataset1$Documentary == 1 |
+    dataset1$Romance     == 1 |
+    dataset1$Short       == 1
+    )
+    )
+
+
+  xx=seq(1900,2005)
+
+  xx2 <- sort(unique(dataset2$year))
+  yy=rep(NA,length(xx))
+  # mean movie budget per year
+  for (i in 1:length(xx)) {
+    ss <- subset(dataset2,dataset2$year==xx[i])
+    yy[i] <- mean(ss$budget)
+  }
+
+  df2 <- data.frame(cbind(xx,yy))
+  names(df2) <- c('year','budget')
+
+
+  xx3 <- sort(unique(dataset3$year))
+  yy=rep(NA,length(xx))
+  # mean movie budget per year
+  for (i in 1:length(xx)) {
+    ss <- subset(dataset3,dataset3$year==xx[i])
+    yy[i] <- mean(ss$budget)
+  }
+
+  df3 <- data.frame(cbind(xx,yy))
+  names(df3) <- c('year','budget')
+
+  budgetMax <- max(na.omit(df2$budget),na.omit(df3$budget))
+
+par(mfrow=c(1,2))
+  plot(budget ~ year, 
+    data=df2, 
+    xlim=c(1950 ,2005 ),
+    ylim=c(0,budgetMax),
+    xlab="Year", ylab="Budget ($)", 
+    main="Rating <= 5")
+
+  if (length(xx2)>0) {
+    fit <- lm(budget~poly(year,5,raw=TRUE), data=df2)
+    lines(xx2,fit$fitted, col='blue',lwd=1.5)
+  }
+
+  plot(budget ~ year, 
+    data=df3, 
+    xlim=c(1950 ,2005 ),
+    ylim=c(0,budgetMax),
+    xlab="Year", ylab="Budget ($)", 
+    main="Rating > 5")
+
+  if (length(xx3)>0) {
+    fit <- lm(budget~poly(year,2,raw=TRUE), data=df3)
+    lines(xx3,fit$fitted, col='blue',lwd=1.5)
+  }
+
+
+```
+
+
